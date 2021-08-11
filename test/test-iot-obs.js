@@ -20,7 +20,7 @@ process.on('uncaughtException', function (err) {
 const CA_NAME = 'antonio-' + crypto.randomBytes(16).toString('hex');
 process.env['MY_ID'] = CA_NAME;
 
-/* Assumes a python bodysnatcher service running locally at port 7090*/
+/* This is a MANUAL test, will not work in all setups, see comments...*/
 
 module.exports = {
     setUp: function (cb) {
@@ -48,7 +48,7 @@ module.exports = {
     },
 
     hello: function(test) {
-        test.expect(3);
+        test.expect(7);
         var s;
         async.series([
             function(cb) {
@@ -87,18 +87,27 @@ module.exports = {
                     };
                     async.series([
                         function(cb2) {
-                            // input, pullup
-                            s.call('http://localhost:7090/calibrate', null,
-                                   cb2);
+                            s.getState(function(err, state) {
+                                // Change to the number of scenes
+                                test.ok(state.scenes.length === 7);
+                                // Always set the 'Scene' as initial state
+                                test.equal(state.currentScene, 'Scene');
+                                cb2(err, state);
+                            });
                         },
                         function(cb2) {
-                            s.startStream('http://localhost:7090/parts',
-                                          null, cb2);
+                            // Ensure that it exists...
+                            s.setCurrentScene('Scene 2', cb2);
                         },
                         function(cb2) {
-                            setTimeout(function() {
-                                s.stopStream(cb2);
-                            }, 10000);
+                            setTimeout(cb2, 2000);
+                        },
+                        function(cb2) {
+                            s.getState(function(err, state) {
+                                test.ok(state.scenes.length === 7);
+                                test.equal(state.currentScene, 'Scene 2');
+                                cb2(err, state);
+                            });
                         }
                     ], cb1);
                 };

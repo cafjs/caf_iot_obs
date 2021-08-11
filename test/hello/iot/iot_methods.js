@@ -18,42 +18,29 @@ limitations under the License.
 
 
 exports.methods = {
-    '__iot_setup__' : function(cb) {
-        this.state.lastValue = null;
-        this.state.streamID = null;
-        cb(null);
+    async __iot_setup__() {
+        this.state.currentScene =  this.$.obs.getCurrentScene();
+        this.$.obs.setHandleSceneChanged('__iot_handle_change_scene');
+        return [];
     },
 
-    '__iot_loop__' : function(cb) {
-        var now = (new Date()).getTime();
+    async __iot_loop__() {
+        const now = (new Date()).getTime();
         this.$.log && this.$.log.debug(now + ' loop:');
-        this.toCloud.set('in', this.state.lastValue);
-        cb(null);
+        this.toCloud.set('currentScene', this.state.currentScene);
+        this.toCloud.set('scenes', this.$.obs.getScenes());
+        return [];
     },
 
-    'dirtyCall' : function(url, options, cb) {
-        var self = this;
-        this.$.http.dirtyCall(url, options, function(err, value) {
-            self.$.log && self.$.log.debug(value);
-            cb(err, value);
-        });
+    async setCurrentScene(name) {
+        this.$.obs.setCurrentScene(name);
+        return [];
     },
 
-    'startStream' : function(url, options, cb) {
-        this.state.streamID = this.$.http.startStream(url, options,
-                                                      '__iot_handle_http__');
-        cb(null);
-    },
-
-    'stopStream' : function(cb) {
-        this.$.http.stopStream(this.state.streamID);
-        cb(null);
-    },
-
-    '__iot_handle_http__' : function(obj, cb) {
-        this.$.log && this.$.log.debug(obj);
-        this.state.lastValue = obj;
-        cb(null);
+    async __iot_handle_change_scene(name) {
+        this.$.log && this.$.log.debug(`Change scene to ${name}`);
+        this.state.currentScene = name;
+        return [];
     }
 
 };
