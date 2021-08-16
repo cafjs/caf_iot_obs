@@ -19,6 +19,7 @@ limitations under the License.
 
 exports.methods = {
     async __iot_setup__() {
+        await this.$.obs.connect();
         this.state.currentScene =  this.$.obs.getCurrentScene();
         this.$.obs.setHandleSceneChanged('__iot_handle_change_scene');
         return [];

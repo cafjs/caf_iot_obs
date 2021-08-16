@@ -89,7 +89,7 @@ module.exports = {
                         function(cb2) {
                             s.getState(function(err, state) {
                                 // Change to the number of scenes
-                                test.ok(state.scenes.length === 7);
+                                test.ok(state.scenes.length === 5);
                                 // Always set the 'Scene' as initial state
                                 test.equal(state.currentScene, 'Scene');
                                 cb2(err, state);
@@ -104,7 +104,7 @@ module.exports = {
                         },
                         function(cb2) {
                             s.getState(function(err, state) {
-                                test.ok(state.scenes.length === 7);
+                                test.ok(state.scenes.length === 5);
                                 test.equal(state.currentScene, 'Scene 2');
                                 cb2(err, state);
                             });
